@@ -18,7 +18,7 @@ cmake -B /tmp/sdl_sound/build -S /tmp/sdl_sound \
   -DCMAKE_INSTALL_PREFIX=/usr \
   -DSDLSOUND_BUILD_STATIC=OFF \
   -DSDLSOUND_BUILD_SHARED=ON
-cmake --build /tmp/sdl_sound/build -j1
+cmake --build /tmp/sdl_sound/build
 cmake --install /tmp/sdl_sound/build
 ldconfig
 
@@ -45,11 +45,12 @@ meson setup build \
   -Duse_miniffi=true \
   -Denable-https=true
 
-ninja -C build -j2
+ninja -C build
 
 # 5. Empaquetar resultado
 mkdir -p /workspace/dist/lib
-cp build/mkxp-z /workspace/dist/
+cp build/mkxp-z.aarch64 /workspace/dist/mkxp-z
+chmod +x /workspace/dist/mkxp-z
 
 # 6. Copiar librerias compartidas dependientes
 for lib in \
