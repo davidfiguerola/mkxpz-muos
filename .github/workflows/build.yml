@@ -22,19 +22,22 @@ jobs:
             apt-get install -y --no-install-recommends \
               build-essential git cmake ninja-build meson pkg-config xxd file ca-certificates \
               libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev \
+              libgles2-mesa-dev libgl-dev \
               libopenal-dev libphysfs-dev libfluidsynth-dev \
               libtheora-dev libvorbis-dev libpixman-1-dev \
               libuchardet-dev libssl-dev ruby3.1-dev \
               libasound2-dev zlib1g-dev libbz2-dev
 
-            # 1. Compilar SDL2_sound (compartida)
-            git clone --depth 1 https://github.com/icculus/SDL_sound.git /tmp/sdl_sound
+            # 1. Compilar SDL2_sound (version compatible con SDL2)
+            git clone --depth 1 --branch git https://github.com/mkxp-z/SDL_sound.git /tmp/sdl_sound
             cmake -B /tmp/sdl_sound/build -S /tmp/sdl_sound \
               -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_INSTALL_PREFIX=/usr \
               -DSDLSOUND_BUILD_STATIC=OFF \
               -DSDLSOUND_BUILD_SHARED=ON
             cmake --build /tmp/sdl_sound/build -j$(nproc)
             cmake --install /tmp/sdl_sound/build
+            ldconfig
 
             # 2. Clonar mkxp-z (rama dev con soporte Essentials v21)
             git clone --depth 1 --branch dev https://github.com/mkxp-z/mkxp-z.git /tmp/mkxp-z
@@ -69,7 +72,7 @@ jobs:
               /usr/lib/aarch64-linux-gnu/libtheora*.so* \
               /usr/lib/aarch64-linux-gnu/libvorbis*.so* \
               /usr/lib/aarch64-linux-gnu/libogg.so* \
-              /usr/local/lib/libSDL2_sound*.so*; do
+              /usr/lib/libSDL2_sound*.so*; do
               [ -e "$lib" ] && cp -d "$lib" /workspace/dist/lib/ || true
             done
 
