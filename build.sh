@@ -11,14 +11,14 @@ apt-get install -y --no-install-recommends \
   libuchardet-dev libssl-dev ruby3.1-dev \
   libasound2-dev zlib1g-dev libbz2-dev
 
-# 1. Compilar SDL2_sound (version compatible con SDL2)
+# 1. Compilar SDL2_sound (j1 para evitar que QEMU se quede pillado)
 git clone --depth 1 --branch git https://github.com/mkxp-z/SDL_sound.git /tmp/sdl_sound
 cmake -B /tmp/sdl_sound/build -S /tmp/sdl_sound \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=/usr \
   -DSDLSOUND_BUILD_STATIC=OFF \
   -DSDLSOUND_BUILD_SHARED=ON
-cmake --build /tmp/sdl_sound/build -j$(nproc)
+cmake --build /tmp/sdl_sound/build -j1
 cmake --install /tmp/sdl_sound/build
 ldconfig
 
@@ -27,13 +27,10 @@ git clone --depth 1 --branch dev https://github.com/mkxp-z/mkxp-z.git /tmp/mkxp-
 cd /tmp/mkxp-z
 
 # 3. Ajustes de librerias para Debian Linux:
-# - iconv y charset estan en libc.so
 ar cr /usr/lib/libiconv.a
 ar cr /usr/lib/libcharset.a
 sed -i "s/find_library('iconv')/find_library('iconv', required: false)/g" src/meson.build
 sed -i "s/find_library('charset')/find_library('charset', required: false)/g" src/meson.build
-
-# - Enlazar decodificador de video theora (theoradec)
 sed -i "s/theora = dependency('theora', static: build_static)/theora = [dependency('theora', static: build_static), dependency('theoradec', static: build_static)]/g" src/meson.build
 
 # 4. Configurar Meson: GLES + SDL2 dinamica + Ruby 3.1
@@ -48,7 +45,7 @@ meson setup build \
   -Duse_miniffi=true \
   -Denable-https=true
 
-ninja -C build
+ninja -C build -j2
 
 # 5. Empaquetar resultado
 mkdir -p /workspace/dist/lib
