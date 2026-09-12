@@ -26,11 +26,15 @@ ldconfig
 git clone --depth 1 --branch dev https://github.com/mkxp-z/mkxp-z.git /tmp/mkxp-z
 cd /tmp/mkxp-z
 
-# 3. En Linux glibc, iconv esta integrado en libc (satisfacer comprobacion de meson)
+# 3. Ajustes de librerias para Debian Linux:
+# - iconv y charset estan en libc.so
 ar cr /usr/lib/libiconv.a
 ar cr /usr/lib/libcharset.a
 sed -i "s/find_library('iconv')/find_library('iconv', required: false)/g" src/meson.build
 sed -i "s/find_library('charset')/find_library('charset', required: false)/g" src/meson.build
+
+# - Enlazar decodificador de video theora (theoradec)
+sed -i "s/theora = dependency('theora', static: build_static)/theora = [dependency('theora', static: build_static), dependency('theoradec', static: build_static)]/g" src/meson.build
 
 # 4. Configurar Meson: GLES + SDL2 dinamica + Ruby 3.1
 meson setup build \
